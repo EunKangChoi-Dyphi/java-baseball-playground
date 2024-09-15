@@ -14,23 +14,11 @@ public class StringTest {
         assertThat(actual).isEqualTo("adc");
     }
 
-    @Test
-    @DisplayName("요구사항 1: 힌트참고")
-    void separateHint() {
-        String inputString = "1,2";
-        String[] testResult = inputString.split(",");
-        assertThat(testResult).contains("1", "2");
-
-        inputString = "1";
-        testResult = inputString.split(",");
-        assertThat(testResult).containsExactly("1");
-    }
-    /*
-    * 요구사항1
-    * -  "1,2"를 , 로 split 했을 때 1과 2로 잘 분리되는지 확인하는 학습테스트 구현한다.
-    * -  "1" 을 , 로 split 했을 때 1만을 포함하는 배열이 반환되는지 대한 학습테스트를 구현한다.
-    * */
-
+    /**
+     * 요구사항 1
+     * -  "1,2"를 , 로 split 했을 때 1과 2로 잘 분리되는지 확인하는 학습테스트 구현한다.
+     * -  "1" 을 , 로 split 했을 때 1만을 포함하는 배열이 반환되는지 대한 학습테스트를 구현한다.
+     * */
     @Test
     void separateMyself() {
         String inputString = "1,2";
@@ -45,7 +33,21 @@ public class StringTest {
         assertThat(testResult).isEqualTo(expectedResult);
     }
 
-    /*
+
+    @Test
+    @DisplayName("요구사항 1: 힌트참고")
+    void separateHint() {
+        String inputString = "1,2";
+        String[] testResult = inputString.split(",");
+        assertThat(testResult).contains("1", "2");
+
+        inputString = "1";
+        testResult = inputString.split(",");
+        assertThat(testResult).containsExactly("1");
+    }
+
+
+    /**
     * 요구사항 2
     * "(1,2)" 값이 주어졌을 때 String의 subString() 메소드를 활용해 ()을 제거하고 "1,2" 를 반환하도록 구현한다.
     * */
