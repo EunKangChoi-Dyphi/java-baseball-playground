@@ -25,11 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *  ex) "2 + 3 * 4 / 2"
  *  ex) "3  " => 3 으로 리턴
  *
- *  [advanced]
+ *  case 2-1) 일부부만 화이트스페이스가 있는경우
  *  ex) "2+ 3 * 4/2"  (일부분만 있는 경우) => "2 + 3 * 4 / 2"
  *  ex) "3 4 + 5" => "34 + 5" 로 리턴
  *
- *  case 2) 화이트 스페이스가 없는경우
+ *  case 2-2) 화이트 스페이스가 없는경우
  *  ex) 3+4 => "3 + 4"
  *  ex) 3
  *
@@ -64,56 +64,91 @@ public class StringCalculator {
         inputStr = "";
     }
 
-    private String[] convertStringArr(String inputStr) {
+    private String checkInputString (String inputStr) {
+        // 3+4 => 3 + 4
+        // 3 3+4 5 - 6 => 33+45-6 =>  33 + 45 - 6
         // 1. 입력문자열에 화이트스페이스들을 모두 제거한다.
-        //        String strRemovedWhiteSpaces = inputStr.replace(" ", "");
-        // 2. white-space 를 기준으로 split 시켜서 문자열 배열로 리턴한다.
+        String strRemovedWhiteSpaces = inputStr.replace(" ", "");
+
+        // 2. 연산자(+, -, *, /, %) 사이에 공백을 넣는다
+        for(String operator : operators) {
+            if(strRemovedWhiteSpaces.contains(operator))
+            strRemovedWhiteSpaces = strRemovedWhiteSpaces.replace(operator, " "+operator+" ");
+        }
+        return strRemovedWhiteSpaces;
+    }
+
+    private String[] convertStringArr(String inputStr) {
+        inputStr = checkInputString(inputStr);
+
+        // white-space 를 기준으로 split 시켜서 문자열 배열로 리턴한다.
         return inputStr.split(" ");
     }
 
     private boolean isOperator (String element) {
         return operators.contains(element);
     }
-    private int calculateInputStr(String[] strArr) {
-        String operator = "";
-        for(int i = 0 ; i < strArr.length ; i++) {
-            // 현재값
-            String curr = strArr[i];
+    private int calculateInputStr(String[] strArr) throws NumberFormatException{
+        try {
+            String operator = "";
+            for (int i = 0; i < strArr.length; i++) {
+                // 현재값
+                String curr = strArr[i];
 
-            if(isOperator(curr)) {
-                operator = curr;
-                continue;
-            }
+                if (isOperator(curr)) {
+                    operator = curr;
+                    continue;
+                }
 
-            int currInt = Integer.parseInt(curr);
-            if(i == 0){
-                result = result + currInt;
-                continue;
-            }
-
-            switch(operator) {
-                case "+":
+                int currInt = Integer.parseInt(curr);
+                if (i == 0) {
                     result = result + currInt;
-                    break;
-                case "-":
-                    result = result - currInt;
-                    break;
-                case "*":
-                    result = result * currInt;
-                    break;
-                case "/":
-                    result = result / currInt;
-                    break;
-                case "%":
-                    result = result % currInt;
-                    break;
-            }
+                    continue;
+                }
 
+                switch (operator) {
+                    case "+":
+                        result = result + currInt;
+                        break;
+                    case "-":
+                        result = result - currInt;
+                        break;
+                    case "*":
+                        result = result * currInt;
+                        break;
+                    case "/":
+                        result = result / currInt;
+                        break;
+                    case "%":
+                        result = result % currInt;
+                        break;
+                }
+
+            }
+            return result;
+        }catch(NumberFormatException e) {
+            throw e;
+
+        }catch(Exception e) {
+            throw e;
         }
-        return result;
     }
 
+    @Test
+    @DisplayName("문자열 '2 24+3' 은 '224 + 3' 이다")
+    void testCheckInputString() {
+        String inputStr = "2 24+3";
+        String result = checkInputString(inputStr);
+        assertThat(result).isEqualTo("224 + 3");
+    }
 
+    /**
+     * [case 1] 화이트스페이스가 있는 경우
+     *
+     *
+     *  ex) "2 + 3 * 4 / 2"
+     *  ex) "3  " => 3 으로 리턴
+     */
     @Test
     @DisplayName("문자열 '2 + 3 * 4 / 2' 의 결과는 10 이다")
     void test1() {
@@ -123,6 +158,16 @@ public class StringCalculator {
 
         int result = calculateInputStr(strArr);
         assertThat(result).isEqualTo(10);
+    }
+    @Test
+    @DisplayName("문자열 '3 ' 의 결과는 3 이다")
+    void test1_2() {
+
+        inputStr = "3 ";
+        String[] strArr =convertStringArr(inputStr);
+
+        int result = calculateInputStr(strArr);
+        assertThat(result).isEqualTo(3);
     }
 
     @Test
@@ -137,6 +182,37 @@ public class StringCalculator {
         int result = calculateInputStr(strArr);
         assertThat(result).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("문자열 '2+ 3 * 4/2' 의 결과는 10 이다")
+    void test3() {
+        inputStr = "2+ 3 * 4/2";
+        String[] strArr = convertStringArr(inputStr);
+
+        int result = calculateInputStr(strArr);
+        assertThat(result).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("문자열 '3 4+6 /2' 의 결과는 20 이다")
+    void test4() {
+        inputStr = "3 4+6 /2";
+        String[] strArr = convertStringArr(inputStr);
+
+        int result = calculateInputStr(strArr);
+        assertThat(result).isEqualTo(20);
+    }
+    @Test
+    @DisplayName("문자열 '4+6/2' 의 결과는 5 이다")
+    void test4_2() {
+        inputStr = "4+6/2";
+        String[] strArr = convertStringArr(inputStr);
+
+        int result = calculateInputStr(strArr);
+        assertThat(result).isEqualTo(5);
+    }
+
+
 
 
 //    void clear() {
